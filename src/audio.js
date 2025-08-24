@@ -188,7 +188,7 @@ export function updateTuning(tuning) {
       }
     }
   });
-}
+} 
 
 // Also update frequencies if transpose changes
 export function updateTranspose() {
