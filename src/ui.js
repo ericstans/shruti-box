@@ -1,3 +1,38 @@
+// --- URL State Sync Helpers ---
+function stateToUrl(state, effects) {
+  const params = new URLSearchParams();
+  if (state.tuning && state.tuning != '12tet') params.set('tuning', state.tuning);
+  if (typeof state.transpose === 'number' && state.transpose !== 0) params.set('transpose', state.transpose);
+  if (typeof state.volume === 'number' && state.volume !== 1) params.set('volume', state.volume);
+  if (effects) {
+    const enabled = Object.keys(effects).filter(k => effects[k]);
+    if (enabled.length) params.set('fx', enabled.join(','));
+  }
+  return params.toString();
+}
+
+function urlToState() {
+  const params = new URLSearchParams(window.location.search);
+  const tuning = params.get('tuning');
+  const transpose = params.get('transpose');
+  const volume = params.get('volume');
+  const fx = params.get('fx');
+  return {
+    tuning,
+    transpose: transpose !== null ? Number(transpose) : undefined,
+    volume: volume !== null ? Number(volume) : undefined,
+    effects: fx ? fx.split(',') : undefined
+  };
+}
+
+function updateUrlFromState() {
+  const state = getState();
+  const effects = window.shrutiEffects || {};
+  const url = stateToUrl(state, effects);
+  const newUrl = url ? `${window.location.pathname}?${url}` : window.location.pathname;
+  window.history.replaceState(null, '', newUrl);
+}
+
 // UI creation and event binding
 import { NOTES, getState, setState, subscribe } from './state.js';
 import { startNote, stopNote, setVolume, updateTuning, initAudio, updateTranspose } from './audio.js';
@@ -88,6 +123,19 @@ export function createUI() {
       holesContainer.appendChild(holeWrapper);
       w++;
     }
+  }
+
+  // --- Restore state from URL if present ---
+  const urlState = urlToState();
+  let initialState = {};
+  if (urlState.tuning) initialState.tuning = urlState.tuning;
+  if (typeof urlState.transpose === 'number' && !isNaN(urlState.transpose)) initialState.transpose = urlState.transpose;
+  if (typeof urlState.volume === 'number' && !isNaN(urlState.volume)) initialState.volume = urlState.volume;
+  if (Object.keys(initialState).length) setState(initialState);
+  // Effects
+  if (urlState.effects && window.shrutiEffects) {
+    Object.keys(window.shrutiEffects).forEach(k => window.shrutiEffects[k] = false);
+    urlState.effects.forEach(k => { if (window.shrutiEffects.hasOwnProperty(k)) window.shrutiEffects[k] = true; });
   }
 
   // Black keys row (top, 5 holes, offset between white holes)
@@ -241,6 +289,7 @@ export function createUI() {
         const idx = NOTES.findIndex(n => n.name === noteName);
         startNote(noteName, idx, state.tuning);
       });
+  updateUrlFromState();
     });
     effLabel.appendChild(effBox);
     effLabel.appendChild(document.createTextNode(eff.label));
@@ -272,6 +321,7 @@ export function createUI() {
     setState({ transpose: parseInt(transposeSlider.value, 10) });
     transposeValue.textContent = ' ' + transposeSlider.value + ' semitones';
     updateTranspose();
+  updateUrlFromState();
   });
 
   // Volume
@@ -293,6 +343,7 @@ export function createUI() {
   volSlider.addEventListener('input', () => {
     setState({ volume: parseFloat(volSlider.value) });
     setVolume(parseFloat(volSlider.value));
+  updateUrlFromState();
   });
 
   app.appendChild(optionsPanel);
@@ -312,6 +363,7 @@ export function createUI() {
     setState({ tuning: tuningSelect.value });
     updateTuning(tuningSelect.value);
     tuningDesc.textContent = tuningExplanations[tuningSelect.value];
+  updateUrlFromState();
   });
 
   // Note toggles
@@ -331,6 +383,7 @@ export function createUI() {
         setState({ selectedNotes: selected });
         if (isPlaying) stopNote(noteName);
       }
+  updateUrlFromState();
     });
   });
 
@@ -360,5 +413,45 @@ export function createUI() {
     volSlider.value = state.volume;
     tuningSelect.value = state.tuning;
     tuningDesc.textContent = tuningExplanations[state.tuning];
-  });
+  })
+
+  // --- Sync options menu UI with loaded state ---
+  // Tuning
+  if (urlState.tuning) {
+    tuningSelect.value = urlState.tuning;
+    tuningDesc.textContent = tuningExplanations[urlState.tuning];
+    updateTuning(urlState.tuning);
+  }
+  // Transpose
+  if (typeof urlState.transpose === 'number' && !isNaN(urlState.transpose)) {
+    transposeSlider.value = urlState.transpose;
+    transposeValue.textContent = ' ' + urlState.transpose + ' semitones';
+    updateTranspose();
+  }
+  // Volume
+  if (typeof urlState.volume === 'number' && !isNaN(urlState.volume)) {
+    volSlider.value = urlState.volume;
+    setVolume(urlState.volume);
+  }
+  // Effects checkboxes
+  if (urlState.effects && Array.isArray(urlState.effects)) {
+    urlState.effects.forEach(key => {
+      const effBox = effectsPanel.querySelector('input[type="checkbox"][value="' + key + '"]')
+        || Array.from(effectsPanel.querySelectorAll('input[type="checkbox"]')).find(cb => cb.parentElement.textContent.trim() === effects.find(e => e.key === key)?.label);
+      if (effBox) effBox.checked = true;
+    });
+  }
+// --- Ensure audio engine is updated to match loaded state ---
+updateTuning(getState().tuning);
+updateTranspose();
+setVolume(getState().volume);
+
+// --- Ensure effects loaded from URL are applied ---
+if (urlState.effects && Array.isArray(urlState.effects)) {
+    urlState.effects.forEach(key => {
+        if (window.shrutiEffects.hasOwnProperty(key)) {
+            window.shrutiEffects[key] = true;
+        }
+    });
 }
+};
