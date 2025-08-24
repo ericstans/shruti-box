@@ -38,6 +38,14 @@ import { NOTES, getState, setState, subscribe } from './state.js';
 import { startNote, stopNote, setVolume, updateTuning, initAudio, updateTranspose } from './audio.js';
 
 export function createUI() {
+  // Add CSS to hide keyboard shortcut labels on mobile
+  const style = document.createElement('style');
+  style.textContent = `
+    @media (hover: none) and (pointer: coarse) {
+      .shruti-key-label { display: none !important; }
+    }
+  `;
+  document.head.appendChild(style);
   let volSlider;
   const app = document.createElement('div');
   app.style.fontFamily = 'sans-serif';
@@ -102,21 +110,22 @@ export function createUI() {
       });
 
       // Hotkey label
-      const label = document.createElement('span');
-      label.textContent = NOTES[i].key;
-      label.style.position = 'relative';
-      label.style.zIndex = '2';
-      label.style.color = '#5a4a1a';
-      label.style.fontWeight = 'bold';
-      label.style.fontSize = '1.1em';
-      label.style.pointerEvents = 'none';
-      label.style.userSelect = 'none';
-      label.style.textAlign = 'center';
-      label.style.width = '32px';
-      label.style.height = '32px';
-      label.style.display = 'flex';
-      label.style.alignItems = 'center';
-      label.style.justifyContent = 'center';
+  const label = document.createElement('span');
+  label.textContent = NOTES[i].key;
+  label.className = 'shruti-key-label';
+  label.style.position = 'relative';
+  label.style.zIndex = '2';
+  label.style.color = '#5a4a1a';
+  label.style.fontWeight = 'bold';
+  label.style.fontSize = '1.1em';
+  label.style.pointerEvents = 'none';
+  label.style.userSelect = 'none';
+  label.style.textAlign = 'center';
+  label.style.width = '32px';
+  label.style.height = '32px';
+  label.style.display = 'flex';
+  label.style.alignItems = 'center';
+  label.style.justifyContent = 'center';
 
       holeWrapper.appendChild(cb);
       holeWrapper.appendChild(label);
@@ -178,21 +187,22 @@ export function createUI() {
     });
 
     // Hotkey label
-    const label = document.createElement('span');
-    label.textContent = NOTES[i].key;
-    label.style.position = 'relative';
-    label.style.zIndex = '2';
-    label.style.color = '#5a4a1a';
-    label.style.fontWeight = 'bold';
-    label.style.fontSize = '1.05em';
-    label.style.pointerEvents = 'none';
-    label.style.userSelect = 'none';
-    label.style.textAlign = 'center';
-    label.style.width = '28px';
-    label.style.height = '28px';
-    label.style.display = 'flex';
-    label.style.alignItems = 'center';
-    label.style.justifyContent = 'center';
+  const label = document.createElement('span');
+  label.textContent = NOTES[i].key;
+  label.className = 'shruti-key-label';
+  label.style.position = 'relative';
+  label.style.zIndex = '2';
+  label.style.color = '#5a4a1a';
+  label.style.fontWeight = 'bold';
+  label.style.fontSize = '1.05em';
+  label.style.pointerEvents = 'none';
+  label.style.userSelect = 'none';
+  label.style.textAlign = 'center';
+  label.style.width = '28px';
+  label.style.height = '28px';
+  label.style.display = 'flex';
+  label.style.alignItems = 'center';
+  label.style.justifyContent = 'center';
 
     holeWrapper.appendChild(cb);
     holeWrapper.appendChild(label);
