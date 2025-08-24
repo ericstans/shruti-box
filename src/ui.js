@@ -1,6 +1,6 @@
 // UI creation and event binding
 import { NOTES, getState, setState, subscribe } from './state.js';
-import { startNote, stopNote, setVolume, updateTuning, initAudio, stopAll, updateTranspose } from './audio.js';
+import { startNote, stopNote, setVolume, updateTuning, initAudio, updateTranspose } from './audio.js';
 
 export function createUI() {
   let volSlider;
@@ -13,13 +13,8 @@ export function createUI() {
   app.style.borderRadius = '12px';
   app.style.boxShadow = '0 2px 8px #ccc';
 
-  const title = document.createElement('h2');
-  title.textContent = 'Shruti Box';
-  app.appendChild(title);
-
   // Note toggles (styled as shruti box holes)
   const whiteKeys = [0,2,4,5,7,9,11];
-  const blackKeys = [1,3,6,8,10];
 
   // Container for both rows
   const holesContainer = document.createElement('div');
