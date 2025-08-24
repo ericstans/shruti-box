@@ -12,15 +12,15 @@ export const TUNINGS = {
   ],
   'meantone': [
     1.0000, 1.0696, 1.1180, 1.1963, 1.25, 1.3375, 1.3975, 1.4953, 1.6018, 1.6719, 1.7818, 1.8692
-  ],
+  ]
 };
 
-// root: note name string (e.g. 'C'), idx: 0-11
-import { NOTES } from './state.js';
-export function getNoteFreq(tuning, idx, root) {
-  // Find root index
-  const rootIdx = NOTES.findIndex(n => n.name === root);
-  // Calculate semitone offset from C
-  const noteIdx = (idx - rootIdx + 12) % 12;
-  return BASE_FREQ * TUNINGS[tuning][noteIdx];
+export function getNoteFreq(tuning, idx) {
+  const table = TUNINGS[tuning];
+  // For tunings with only 12 entries, map 13th note (high C) to 2x base C
+  if (idx >= table.length) {
+    // If high C, double the first note's ratio
+    return BASE_FREQ * table[0] * 2;
+  }
+  return BASE_FREQ * table[idx];
 }

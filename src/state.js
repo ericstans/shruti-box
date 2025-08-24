@@ -18,7 +18,7 @@ export const NOTES = [
 let state = {
   selectedNotes: [],
   tuning: '12tet',
-  volume: 0.3,
+  volume: 1,
   transpose: 0, // in semitones
 };
 

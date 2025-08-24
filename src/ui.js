@@ -24,16 +24,27 @@ export function createUI() {
   // Container for both rows
   const holesContainer = document.createElement('div');
   holesContainer.style.position = 'relative';
-  holesContainer.style.width = '260px';
+  holesContainer.style.width = '300px'; // increased for 8 holes
   holesContainer.style.height = '70px';
   holesContainer.style.margin = '1.2em auto 1.5em auto';
   holesContainer.style.display = 'block';
 
-  // White keys row (bottom, 7 holes + high C)
-  const whitePositions = [0, 40, 80, 120, 160, 200, 240, 280];
+  // White keys row (bottom, 8 holes)
+  const whitePositions = [0, 38, 76, 114, 152, 190, 228, 266];
   for (let i = 0, w = 0; i < NOTES.length; i++) {
     // Add 8th hole for high C
     if ((whiteKeys.includes(i) && i < 12) || i === 12) {
+      // Create a wrapper for the hole and label
+      const holeWrapper = document.createElement('div');
+      holeWrapper.style.position = 'absolute';
+      holeWrapper.style.left = whitePositions[w] + 'px';
+      holeWrapper.style.top = '32px';
+      holeWrapper.style.width = '32px';
+      holeWrapper.style.height = '32px';
+      holeWrapper.style.display = 'flex';
+      holeWrapper.style.alignItems = 'center';
+      holeWrapper.style.justifyContent = 'center';
+
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.className = 'note-toggle';
@@ -43,9 +54,6 @@ export function createUI() {
       if (w === 6 && i < 12) {
         cb.setAttribute('data-octave', '1');
       }
-      cb.style.position = 'absolute';
-      cb.style.left = whitePositions[w] + 'px';
-      cb.style.top = '32px';
       cb.style.width = '32px';
       cb.style.height = '32px';
       cb.style.borderRadius = '50%';
@@ -56,28 +64,59 @@ export function createUI() {
       cb.style.outline = 'none';
       cb.style.cursor = 'pointer';
       cb.style.boxShadow = '0 2px 8px #b89b5a44';
+      cb.style.position = 'absolute';
+      cb.style.left = '0';
+      cb.style.top = '0';
       cb.addEventListener('change', function() {
         cb.style.background = cb.checked ? '#c2a05a' : '#e0c080';
       });
-      holesContainer.appendChild(cb);
+
+      // Hotkey label
+      const label = document.createElement('span');
+      label.textContent = NOTES[i].key;
+      label.style.position = 'relative';
+      label.style.zIndex = '2';
+      label.style.color = '#5a4a1a';
+      label.style.fontWeight = 'bold';
+      label.style.fontSize = '1.1em';
+      label.style.pointerEvents = 'none';
+      label.style.userSelect = 'none';
+      label.style.textAlign = 'center';
+      label.style.width = '32px';
+      label.style.height = '32px';
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.justifyContent = 'center';
+
+      holeWrapper.appendChild(cb);
+      holeWrapper.appendChild(label);
+      holesContainer.appendChild(holeWrapper);
       w++;
     }
   }
 
   // Black keys row (top, 5 holes, offset between white holes)
   // Place black keys between white keys: after 1st, 2nd, 4th, 5th, 6th white key
-  const blackPositions = [28, 68, 148, 188, 228];
+  const blackPositions = [27, 65, 141, 179, 217];
   let blackKeyOrder = [1,3,6,8,10];
   for (let j = 0; j < blackKeyOrder.length; j++) {
     const i = blackKeyOrder[j];
+    // Create a wrapper for the hole and label
+    const holeWrapper = document.createElement('div');
+    holeWrapper.style.position = 'absolute';
+    holeWrapper.style.left = blackPositions[j] + 'px';
+    holeWrapper.style.top = '6px';
+    holeWrapper.style.width = '28px';
+    holeWrapper.style.height = '28px';
+    holeWrapper.style.display = 'flex';
+    holeWrapper.style.alignItems = 'center';
+    holeWrapper.style.justifyContent = 'center';
+
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.className = 'note-toggle';
     cb.setAttribute('data-key', NOTES[i].key);
     cb.setAttribute('data-note', NOTES[i].name);
-    cb.style.position = 'absolute';
-    cb.style.left = blackPositions[j] + 'px';
-    cb.style.top = '6px';
     cb.style.width = '28px';
     cb.style.height = '28px';
     cb.style.borderRadius = '50%';
@@ -88,10 +127,33 @@ export function createUI() {
     cb.style.outline = 'none';
     cb.style.cursor = 'pointer';
     cb.style.boxShadow = '0 2px 8px #b89b5a44';
+    cb.style.position = 'absolute';
+    cb.style.left = '0';
+    cb.style.top = '0';
     cb.addEventListener('change', function() {
       cb.style.background = cb.checked ? '#c2a05a' : '#e0c080';
     });
-    holesContainer.appendChild(cb);
+
+    // Hotkey label
+    const label = document.createElement('span');
+    label.textContent = NOTES[i].key;
+    label.style.position = 'relative';
+    label.style.zIndex = '2';
+    label.style.color = '#5a4a1a';
+    label.style.fontWeight = 'bold';
+    label.style.fontSize = '1.05em';
+    label.style.pointerEvents = 'none';
+    label.style.userSelect = 'none';
+    label.style.textAlign = 'center';
+    label.style.width = '28px';
+    label.style.height = '28px';
+    label.style.display = 'flex';
+    label.style.alignItems = 'center';
+    label.style.justifyContent = 'center';
+
+    holeWrapper.appendChild(cb);
+    holeWrapper.appendChild(label);
+    holesContainer.appendChild(holeWrapper);
   }
   app.appendChild(holesContainer);
   holesContainer.style.marginLeft = 'auto';
@@ -124,7 +186,7 @@ export function createUI() {
     { label: '12-TET (Equal Temperament)', value: '12tet' },
     { label: 'Just Intonation', value: 'just' },
     { label: 'Pythagorean', value: 'pythagorean' },
-    { label: 'Meantone', value: 'meantone' },
+    { label: 'Meantone', value: 'meantone' }
   ];
   tuningOptions.forEach(opt => {
     const option = document.createElement('option');
@@ -139,7 +201,7 @@ export function createUI() {
     '12tet': '12-TET (Twelve-tone equal temperament) divides the octave into 12 equal steps. Standard for modern Western music.',
     'just': 'Just intonation uses simple whole-number ratios for pure intervals. Harmonically rich, but key-dependent.',
     'pythagorean': 'Pythagorean tuning is based on pure fifths (3:2 ratio). Bright, but some intervals are wide or narrow.',
-    'meantone': 'Meantone temperament tempers fifths to improve major thirds. Used in Renaissance/Baroque music.',
+    'meantone': 'Meantone temperament tempers fifths to improve major thirds. Used in Renaissance/Baroque music.'
   };
   const tuningDesc = document.createElement('span');
   tuningDesc.style.marginLeft = '1.5em';
@@ -150,6 +212,47 @@ export function createUI() {
   tuningRow.appendChild(tuningDesc);
 
   optionsPanel.appendChild(tuningRow);
+  
+  // --- Effects checkboxes ---
+  const effects = [
+    { key: 'detune', label: 'Subtle Detuning' },
+    { key: 'envelope', label: 'Envelope (Attack/Release)' },
+    { key: 'harmonics', label: 'Harmonic Content' },
+    { key: 'noise', label: 'Bellows Noise Layer' },
+    { key: 'tremolo', label: 'Dynamic Volume (Tremolo)' },
+    { key: 'stereo', label: 'Stereo Spread' },
+    { key: 'reverb', label: 'Reverb/Ambience' },
+  ];
+  if (!window.shrutiEffects) window.shrutiEffects = {};
+  const effectsPanel = document.createElement('div');
+  effectsPanel.style.marginTop = '1em';
+  effectsPanel.style.display = 'flex';
+  effectsPanel.style.flexWrap = 'wrap';
+  effectsPanel.style.gap = '1.2em 2em';
+  effects.forEach(eff => {
+    const effLabel = document.createElement('label');
+    effLabel.style.display = 'flex';
+    effLabel.style.alignItems = 'center';
+    effLabel.style.gap = '0.4em';
+    const effBox = document.createElement('input');
+    effBox.type = 'checkbox';
+    effBox.checked = false;
+    effBox.addEventListener('change', ev => {
+      window.shrutiEffects[eff.key] = ev.target.checked;
+      // Restart all currently playing notes (stop and start each selected note)
+      const state = getState();
+      state.selectedNotes.forEach(noteName => {
+        stopNote(noteName);
+        const idx = NOTES.findIndex(n => n.name === noteName);
+        startNote(noteName, idx, state.tuning);
+      });
+    });
+    effLabel.appendChild(effBox);
+    effLabel.appendChild(document.createTextNode(eff.label));
+    effectsPanel.appendChild(effLabel);
+    window.shrutiEffects[eff.key] = false;
+  });
+  optionsPanel.appendChild(effectsPanel);
 
   // Transpose
   const transposeLabel = document.createElement('label');
@@ -199,40 +302,15 @@ export function createUI() {
 
   app.appendChild(optionsPanel);
 
-  // Start/Stop
-  const playBtn = document.createElement('button');
-  playBtn.textContent = 'Start';
-  playBtn.style.marginTop = '1.5em';
-  playBtn.style.width = '100%';
-  playBtn.style.fontSize = '1.2em';
-  playBtn.style.padding = '0.5em';
-  playBtn.style.background = '#4caf50';
-  playBtn.style.color = 'white';
-  playBtn.style.border = 'none';
-  playBtn.style.borderRadius = '6px';
-  playBtn.style.cursor = 'pointer';
-  app.appendChild(playBtn);
 
   document.body.appendChild(app);
 
-  // Event listeners
-  let isPlaying = false;
-  playBtn.addEventListener('click', () => {
-    if (!isPlaying) {
-      initAudio();
-      getState().selectedNotes.forEach(noteName => {
-        const idx = NOTES.findIndex(n => n.name === noteName);
-        startNote(noteName, idx, getState().tuning);
-      });
-      playBtn.textContent = 'Stop';
-      playBtn.style.background = '#f44336';
-      isPlaying = true;
-    } else {
-      stopAll();
-      playBtn.textContent = 'Start';
-      playBtn.style.background = '#4caf50';
-      isPlaying = false;
-    }
+  // Start audio as soon as the page loads
+  let isPlaying = true;
+  initAudio();
+  getState().selectedNotes.forEach(noteName => {
+    const idx = NOTES.findIndex(n => n.name === noteName);
+    startNote(noteName, idx, getState().tuning);
   });
 
   tuningSelect.addEventListener('change', () => {
