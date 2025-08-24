@@ -127,26 +127,46 @@ export function startNote(noteName, idx, tuning) {
 
   // Reverb/ambience
   let reverbNode = null;
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
   if (effects.reverb) {
-    reverbNode = audioCtx.createConvolver();
-    // Use a much shorter impulse response on mobile for performance
-    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
-    const reverbSeconds = isMobile ? 0.2 : 1.2;
-    const len = audioCtx.sampleRate * reverbSeconds;
-    const ir = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
-    for (let c = 0; c < 2; c++) {
-      const d = ir.getChannelData(c);
-      for (let i = 0; i < len; i++) {
-        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2) * 0.25;
+    if (isMobile) {
+      // Use a simple delay/echo for mobile instead of convolution reverb
+      const delay = audioCtx.createDelay();
+      delay.delayTime.value = 0.11; // short echo
+      const feedback = audioCtx.createGain();
+      feedback.gain.value = 0.22;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      // Connect the dry signal and the echo to the output
+      if (panNode) {
+        panNode.disconnect();
+        panNode.connect(gainNode); // dry
+        panNode.connect(delay).connect(gainNode); // wet
+      } else {
+        envGain.disconnect();
+        envGain.connect(gainNode); // dry
+        envGain.connect(delay).connect(gainNode); // wet
       }
-    }
-    reverbNode.buffer = ir;
-    if (panNode) {
-      panNode.disconnect();
-      panNode.connect(reverbNode).connect(gainNode);
+      reverbNode = delay; // for tracking
     } else {
-      envGain.disconnect();
-      envGain.connect(reverbNode).connect(gainNode);
+      reverbNode = audioCtx.createConvolver();
+      const reverbSeconds = 1.2;
+      const len = audioCtx.sampleRate * reverbSeconds;
+      const ir = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
+      for (let c = 0; c < 2; c++) {
+        const d = ir.getChannelData(c);
+        for (let i = 0; i < len; i++) {
+          d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2) * 0.25;
+        }
+      }
+      reverbNode.buffer = ir;
+      if (panNode) {
+        panNode.disconnect();
+        panNode.connect(reverbNode).connect(gainNode);
+      } else {
+        envGain.disconnect();
+        envGain.connect(reverbNode).connect(gainNode);
+      }
     }
   }
 
