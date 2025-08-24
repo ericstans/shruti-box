@@ -6,6 +6,12 @@ import { transposeFreq } from './transpose.js';
 let audioCtx = null;
 let gainNode = null;
 let oscillators = {};
+function updatePolyphonyGain() {
+  if (!gainNode) return;
+  const n = Math.max(1, Object.keys(oscillators).length);
+  // The user volume is already applied, so this is a polyphony compensation factor
+  gainNode.gain.value = (getState().volume || 1) / n;
+}
 
 export function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -16,7 +22,11 @@ export function initAudio() {
 }
 
 export function setVolume(vol) {
-  if (gainNode) gainNode.gain.value = vol;
+  if (gainNode) {
+    // Polyphony compensation
+    const n = Math.max(1, Object.keys(oscillators).length);
+    gainNode.gain.value = vol / n;
+  }
 }
 
 export function startNote(noteName, idx, tuning) {
@@ -32,6 +42,9 @@ export function startNote(noteName, idx, tuning) {
   const baseGain = (effects.harmonics ? 0.6 : 1.0);
   envGain.gain.value = effects.envelope ? 0 : baseGain;
   envGain.connect(gainNode);
+
+  // Update polyphony gain
+  setTimeout(updatePolyphonyGain, 0);
 
   // Main oscillator (triangle or with harmonics)
   const osc = audioCtx.createOscillator();
@@ -169,6 +182,7 @@ export function stopNote(noteName) {
     if (o.tremoloLFO) o.tremoloLFO.stop();
     // No need to stop gain, pan, or reverb nodes (they are not sources)
     delete oscillators[noteName];
+  setTimeout(updatePolyphonyGain, 0);
   }
 }
 
