@@ -129,8 +129,10 @@ export function startNote(noteName, idx, tuning) {
   let reverbNode = null;
   if (effects.reverb) {
     reverbNode = audioCtx.createConvolver();
-    // Simple impulse response: short noise burst
-    const len = audioCtx.sampleRate * 1.2;
+    // Use a much shorter impulse response on mobile for performance
+    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+    const reverbSeconds = isMobile ? 0.2 : 1.2;
+    const len = audioCtx.sampleRate * reverbSeconds;
     const ir = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const d = ir.getChannelData(c);
