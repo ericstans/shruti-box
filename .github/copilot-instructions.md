@@ -1,1 +1,2 @@
-Don't add "...existing code..." comments.
+- Don't add "...existing code..." comments.
+- If something is unclear, ask followup questions before making changes.

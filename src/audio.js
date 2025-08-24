@@ -160,12 +160,15 @@ export function startNote(noteName, idx, tuning) {
         }
       }
       reverbNode.buffer = ir;
+      // Add post-gain after reverb to compensate for volume loss
+      const reverbGain = audioCtx.createGain();
+      reverbGain.gain.value = 1.7; // empirically chosen, tweak as needed
       if (panNode) {
         panNode.disconnect();
-        panNode.connect(reverbNode).connect(gainNode);
+        panNode.connect(reverbNode).connect(reverbGain).connect(gainNode);
       } else {
         envGain.disconnect();
-        envGain.connect(reverbNode).connect(gainNode);
+        envGain.connect(reverbNode).connect(reverbGain).connect(gainNode);
       }
     }
   }
