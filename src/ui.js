@@ -21,7 +21,7 @@ export function createUI() {
   holesContainer.style.position = 'relative';
   holesContainer.style.width = '300px'; // increased for 8 holes
   holesContainer.style.height = '70px';
-  holesContainer.style.margin = '1.2em auto 1.5em auto';
+  holesContainer.style.margin = '0 auto 1.5em auto';
   holesContainer.style.display = 'block';
 
   // White keys row (bottom, 8 holes)
